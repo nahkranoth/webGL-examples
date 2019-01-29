@@ -25,6 +25,6 @@ void main() {
     vec3 lightVec = -incidentVec;
     float diffuse = max(dot(lightVec, normal), 0.0);
     float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
-    float ambient = 0.1;
+    float ambient = 0.3;
     fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
 }

@@ -11,10 +11,9 @@ export default class Example5 {
     constructor(app){
         this.app = app;
         this.obj = new ObjLoader(objMesh, true);
-        var glTFLoader = new GTFLoader.glTFLoader();
-
-        glTFLoader.loadGLTF("cube.gltf", _.bind(this.init, this));
-
+        // var glTFLoader = new GTFLoader.glTFLoader();
+        // glTFLoader.loadGLTF("cube.gltf", _.bind(this.init, this));
+        this.init();
         this.initialized = false;
     }
 

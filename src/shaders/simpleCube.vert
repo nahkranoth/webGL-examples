@@ -11,6 +11,7 @@ uniform SceneUniforms {
 };
 
 uniform mat4 uModel;
+uniform float uTime;
 
 out vec3 vPosition;
 out vec2 vUV;
@@ -20,5 +21,6 @@ void main() {
     vPosition = worldPosition.xyz;
     vUV = uv;
     vNormal = (uModel * normal).xyz;
+    worldPosition = worldPosition + (sin(uTime) * 0.5);
     gl_Position = viewProj * worldPosition;
 }

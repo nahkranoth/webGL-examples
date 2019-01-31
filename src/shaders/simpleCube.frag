@@ -8,7 +8,7 @@ uniform SceneUniforms {
     vec4 lightPosition;
 };
 
-uniform sampler2D tex;
+uniform float uTime;
 
 in vec3 vPosition;
 in vec2 vUV;
@@ -26,5 +26,5 @@ void main() {
     float diffuse = max(dot(lightVec, normal), 0.0);
     float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
     float ambient = 0.3;
-    fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+    fragColor = vec4(color * (diffuse + highlight + ambient), 1.0) * ( 1.0 - (sin(uTime) + 0.5) - 0.5 );
 }

@@ -18,6 +18,7 @@ out vec4 fragColor;
 void main() {
     vec2 mUV = vec2( vUV.x, vUV.y);
 
+
     vec3 color = vec3(mUV.x, mUV.y, 0.0);
     vec3 normal = normalize(vNormal);
     vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
@@ -27,4 +28,5 @@ void main() {
     float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
     float ambient = 0.1;
     fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+    fragColor = texture;
 }

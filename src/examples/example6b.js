@@ -4,7 +4,7 @@ import vertShader from "../shaders/simpleCube.vert"
 import fragShader from "../shaders/simpleCube.frag"
 import texture from "../img/box.jpg"
 import ObjLoader from "../utils/obj-loader";
-import objMesh from "../assets/cube.obj";
+import objMesh from "../assets/thetra.obj";
 
 export default class Example6b {
     constructor(app){

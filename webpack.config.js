@@ -44,6 +44,7 @@ module.exports = {
     devServer: {
         contentBase: path.join(__dirname, 'build'),
         open: true,
+        host: "192.168.1.65",
         watchOptions: {
             ignored: ['build', 'node_modules', 'custom']
         }

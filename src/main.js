@@ -9,6 +9,7 @@ import Example6 from "./examples/example6"
 import Example6b from "./examples/example6b"
 import Example7 from "./examples/example7"
 import Example8 from "./examples/example8"
+import Example9 from "./examples/example9"
 
 export class Main{
     constructor(){
@@ -20,16 +21,13 @@ export class Main{
         var $canvas = document.getElementById("main-canvas");
         this.app = PicoGL.createApp($canvas)
             .clearColor(0.0, 0.0, 0.0, 1.0)
-            .depthTest()
-            .depthFunc(PicoGL.LESS)
-            .blend()
-            .blendFunc(PicoGL.SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA);
+            .depthTest();
 
         window.onresize = function(){
             this.app.resize(window.innerWidth, window.innerHeight);
         };
 
-        this.example = new Example8(this.app);
+        this.example = new Example9(this.app);
         window.requestAnimationFrame(_.bind(this.render, this));
     }
 

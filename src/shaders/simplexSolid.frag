@@ -45,16 +45,9 @@ float noise (in vec2 st) {
 
 void main() {
     vec2 mUV = vec2( vUV.x, vUV.y);
-    vec4 texture = texture(tex, mUV);
-    vec2 sMUV = mUV *10.0;
-
-    vec2 pos = vec2(sMUV);
-    vec2 posN = vec2(sMUV + vec2(0., 0.1));
-
+    vec2 pos = vec2(mUV*50.0);
     float n = round(noise(pos + (uTime * 3.0)));
-    float nN = round(noise(posN + (uTime * 3.0)));
+    vec3 color = vec3(n);
 
-    if(n == 0.0) discard;
-    vec3 color = vec3(nN);
-    fragColor = texture * vec4(color , 1.0 );
+    fragColor = vec4(color , 1.0 );
 }

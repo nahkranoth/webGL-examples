@@ -15,11 +15,10 @@ export default class Example8{
     init(){
         utils.addTimerElement();
         this.timer = this.app.createTimer();
-        var vsSource = vertShader;
-        var fsSource = fragShader;
-        var initProgram = this.app.createProgram(vsSource, fsSource);
 
-        var updateProgram = this.app.createProgram(vsSourceUpdate, fsSourceUpdate);
+        var initProgram = this.app.createProgram(vertShader, fragShader);
+
+        var updateProgram = this.app.createProgram(vsSourceUpdate, fsSourceUpdate, ["vPosition"]);
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);
@@ -103,18 +102,28 @@ export default class Example8{
         this.updateDrawCallA = this.app.createDrawCall(updateProgram, updateArrayA).transformFeedback(transformFeedbackB);
         this.updateDrawCallB = this.app.createDrawCall(updateProgram, updateArrayB).transformFeedback(transformFeedbackA);
 
-        this.currentDrawCall = this.drawCallA;
+        this.updateDrawCall = this.updateDrawCallA;
+        this.mainDrawCall = this.drawCallB;
     }
 
     render(){
         if(this.timer.ready()){
             utils.updateTimerElement(this.timer.cpuTime, this.timer.gpuTime);
         }
-        this.timer.start();
-        this.app.clear();
-        this.currentDrawCall.draw();
 
-        //this.currentDrawCall = this.currentDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
+        this.timer.start();
+        this.app.rasterize().clear();
+
+        // TRANSFORM FEEDBACK
+        this.app.noRasterize();
+        this.updateDrawCall.draw();
+
+        // DRAW
+        this.app.rasterize().clear();
+        this.mainDrawCall.draw();
+
+        this.updateDrawCall = this.updateDrawCall === this.updateDrawCallA ? this.updateDrawCallB : this.updateDrawCallA;
+        this.mainDrawCall = this.mainDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
 
         this.timer.end();
     }

@@ -1,7 +1,9 @@
 import _ from "underscore"
 import * as PicoGL from "picogl";
-import vertShader from "../shaders/offsetFeedbackTransform.vert"
-import fragShader from "../shaders/offsetFeedbackTransform.frag"
+import vertShader from "../shaders/offsetInitTransform.vert"
+import fragShader from "../shaders/offsetInitTransform.frag"
+import vsSourceUpdate from "../shaders/offsetFeedbackTransform.vert"
+import fsSourceUpdate from "../shaders/offsetFeedbackTransform.frag"
 import {mat4, vec3} from "gl-matrix";
 
 export default class Example8{
@@ -15,7 +17,9 @@ export default class Example8{
         this.timer = this.app.createTimer();
         var vsSource = vertShader;
         var fsSource = fragShader;
-        var program = this.app.createProgram(vsSource, fsSource);//note last array defining feedback vars
+        var initProgram = this.app.createProgram(vsSource, fsSource);
+
+        var updateProgram = this.app.createProgram(vsSourceUpdate, fsSourceUpdate);
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);
@@ -36,15 +40,12 @@ export default class Example8{
             .update();
 
 
-
-        var positions1 = this.app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
+        var positions = this.app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
             -0.04, -0.04,  0.04,
             0.04, -0.04,  0.04,
             0.04,  0.04,  0.04,
             -0.04,  0.04,  0.04
         ]));
-
-        //var positions2 = this.app.createVertexBuffer(PicoGL.FLOAT, 2, 6);
 
         var colors = this.app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
             1, 0, 0,
@@ -54,7 +55,7 @@ export default class Example8{
         ]));
 
         var INSTANCE_AMOUNT = 3000;
-        var offsetData = new Float32Array(INSTANCE_AMOUNT * 2);
+        var offsetData = new Float32Array(INSTANCE_AMOUNT * 3);
 
         for(var i=0;i<INSTANCE_AMOUNT;i++){
             var oi = i * 3;
@@ -63,39 +64,44 @@ export default class Example8{
             offsetData[oi+2] = (i/3000)-0.04;
         }
 
-        //Sort offset data [1, 2, 3] op elke 3de value
-
-
-        //var sortedOffsetData = _.sortBy(offsetData, function(o, i) {  return o[i % 3]; });
-
-        var offsets = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData);
+        var offsetsInput = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData);
+        var offsetsOutput = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData.length);
 
         var indices = this.app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, new Uint16Array([
             0, 1, 2, 0, 2, 3
         ]));
 
+        var updateArrayA = this.app.createVertexArray()
+            .vertexAttributeBuffer(0, offsetsInput);
+
+        var updateArrayB = this.app.createVertexArray()
+            .vertexAttributeBuffer(0, offsetsOutput);
+
+        var transformFeedbackA = this.app.createTransformFeedback()
+            .feedbackBuffer(0, offsetsInput);
+
+        var transformFeedbackB = this.app.createTransformFeedback()
+            .feedbackBuffer(0, offsetsOutput);
+
         var triangleArrayA = this.app.createVertexArray()
-            .vertexAttributeBuffer(0, positions1)
+            .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, colors)
-            .instanceAttributeBuffer(2, offsets)
+            .instanceAttributeBuffer(2, offsetsInput)
             .indexBuffer(indices);
 
-        // var triangleArrayB = this.app.createVertexArray()
-        //     .vertexAttributeBuffer(0, positions2)
-        //     .vertexAttributeBuffer(1, colors);
-        //
-        // var transformFeedbackA = this.app.createTransformFeedback()
-        //     .feedbackBuffer(0, positions1);
+        var triangleArrayB = this.app.createVertexArray()
+            .vertexAttributeBuffer(0, positions)
+            .vertexAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(2, offsetsOutput)
+            .indexBuffer(indices);
 
-        // var transformFeedbackB = this.app.createTransformFeedback()
-        //     .feedbackBuffer(0, positions2);
+        //DrawCalls
 
+        this.drawCallA = this.app.createDrawCall(initProgram, triangleArrayA).uniformBlock("SceneUniforms", sceneUniformBuffer);
+        this.drawCallB = this.app.createDrawCall(initProgram, triangleArrayB).uniformBlock("SceneUniforms", sceneUniformBuffer);
 
-        this.drawCallA = this.app.createDrawCall(program, triangleArrayA).uniformBlock("SceneUniforms", sceneUniformBuffer);
-            //.transformFeedback(transformFeedbackB);
-        //
-        // this.drawCallB = this.app.createDrawCall(program, triangleArrayB)
-        //     .transformFeedback(transformFeedbackA);
+        this.updateDrawCallA = this.app.createDrawCall(updateProgram, updateArrayA).transformFeedback(transformFeedbackB);
+        this.updateDrawCallB = this.app.createDrawCall(updateProgram, updateArrayB).transformFeedback(transformFeedbackA);
 
         this.currentDrawCall = this.drawCallA;
     }

@@ -1,56 +1,33 @@
-import PicoGL from "picogl"
-import {mat4, vec3} from "gl-matrix"
-import vertShader from "../shaders/simplex.vert"
-import fragShader from "../shaders/simplex.frag"
-import texture from "../img/rainbow.png"
-import ObjLoader from "../utils/obj-loader";
-import objMesh from "../assets/sphere.obj";
+import _ from "underscore"
+import * as PicoGL from "picogl";
+import vertShader from "../shaders/offsetFeedbackTransform.vert"
+import fragShader from "../shaders/offsetFeedbackTransform.frag"
+import {mat4, vec3} from "gl-matrix";
 
-export default class Example6b {
+export default class Example8{
     constructor(app){
         this.app = app;
-        this.obj = new ObjLoader(objMesh, true);
         this.init();
-        this.initialized = false;
     }
 
     init(){
         utils.addTimerElement();
-
         this.timer = this.app.createTimer();
-
         var vsSource = vertShader;
-        var fsSource =  fragShader;
-
-        this.program = this.app.createProgram(vsSource, fsSource);
-
-        var indicesU16 = new Uint16Array(this.obj[0]);
-        var pos32 = new Float32Array(this.obj[1]);
-        var normals32 = new Float32Array(this.obj[2]);
-        var uv32 = new Float32Array(this.obj[3]);
-
-        var positions = this.app.createVertexBuffer(PicoGL.FLOAT, 3,  pos32);
-        var uv = this.app.createVertexBuffer(PicoGL.FLOAT, 2,  uv32);
-        var normals = this.app.createVertexBuffer(PicoGL.FLOAT, 3,  normals32);
-        var indices = this.app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indicesU16);
-
-        this.sphereArray = this.app.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .vertexAttributeBuffer(1, uv)
-            .vertexAttributeBuffer(2, normals)
-            .indexBuffer(indices);
+        var fsSource = fragShader;
+        var program = this.app.createProgram(vsSource, fsSource);//note last array defining feedback vars
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 4);
+        var eyePosition = vec3.fromValues(0, 0, 30);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0,0,0), vec3.fromValues(0, 0.1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        this.sceneUniformBuffer = this.app.createUniformBuffer([
+        let sceneUniformBuffer = this.app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
@@ -58,38 +35,80 @@ export default class Example6b {
             .set(1, eyePosition)
             .update();
 
-        this.modelMatrix = mat4.create();
 
-        this.img = new Image();
-        this.img.src = texture;
-        this.img.onload = _.bind(this.preloadDone, this);
-    }
 
-    preloadDone(){
-        var txt = this.app.createTexture2D(this.img, {flipY: true});
+        var positions1 = this.app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
+            -0.04, -0.04,  0.04,
+            0.04, -0.04,  0.04,
+            0.04,  0.04,  0.04,
+            -0.04,  0.04,  0.04
+        ]));
 
-        this.drawCall = this.app.createDrawCall(this.program, this.sphereArray)
-            .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
-            .texture("tex", txt);
+        //var positions2 = this.app.createVertexBuffer(PicoGL.FLOAT, 2, 6);
 
-        this.startTime = performance.now();
-        this.initialized = true;
+        var colors = this.app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 1
+        ]));
+
+        var INSTANCE_AMOUNT = 3000;
+        var offsetData = new Float32Array(INSTANCE_AMOUNT * 2);
+
+        for(var i=0;i<INSTANCE_AMOUNT;i++){
+            var oi = i * 3;
+            offsetData[oi] = Math.random() * 2.0 - 1.0;
+            offsetData[oi+1] = Math.random() * 2.0 - 1.0;
+            offsetData[oi+2] = (i/3000)-0.04;
+        }
+
+        //Sort offset data [1, 2, 3] op elke 3de value
+
+
+        //var sortedOffsetData = _.sortBy(offsetData, function(o, i) {  return o[i % 3]; });
+
+        var offsets = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData);
+
+        var indices = this.app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, new Uint16Array([
+            0, 1, 2, 0, 2, 3
+        ]));
+
+        var triangleArrayA = this.app.createVertexArray()
+            .vertexAttributeBuffer(0, positions1)
+            .vertexAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(2, offsets)
+            .indexBuffer(indices);
+
+        // var triangleArrayB = this.app.createVertexArray()
+        //     .vertexAttributeBuffer(0, positions2)
+        //     .vertexAttributeBuffer(1, colors);
+        //
+        // var transformFeedbackA = this.app.createTransformFeedback()
+        //     .feedbackBuffer(0, positions1);
+
+        // var transformFeedbackB = this.app.createTransformFeedback()
+        //     .feedbackBuffer(0, positions2);
+
+
+        this.drawCallA = this.app.createDrawCall(program, triangleArrayA).uniformBlock("SceneUniforms", sceneUniformBuffer);
+            //.transformFeedback(transformFeedbackB);
+        //
+        // this.drawCallB = this.app.createDrawCall(program, triangleArrayB)
+        //     .transformFeedback(transformFeedbackA);
+
+        this.currentDrawCall = this.drawCallA;
     }
 
     render(){
-        if(!this.initialized) return;
-
         if(this.timer.ready()){
             utils.updateTimerElement(this.timer.cpuTime, this.timer.gpuTime);
         }
-
         this.timer.start();
-
-        this.drawCall.uniform("uModel", this.modelMatrix);
-        this.drawCall.uniform("uTime", performance.now() / 1000.0);
-
         this.app.clear();
-        this.drawCall.draw();
+        this.currentDrawCall.draw();
+
+        //this.currentDrawCall = this.currentDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
 
         this.timer.end();
     }

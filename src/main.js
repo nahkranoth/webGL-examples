@@ -6,10 +6,9 @@ import Example3 from "./examples/example3"
 import Example4 from "./examples/example4"
 import Example5 from "./examples/example5"
 import Example6 from "./examples/example6"
-import Example6b from "./examples/example6b"
 import Example7 from "./examples/example7"
 import Example8 from "./examples/example8"
-import Example9 from "./examples/example9"
+
 
 export class Main{
     constructor(){
@@ -27,7 +26,7 @@ export class Main{
             this.app.resize(window.innerWidth, window.innerHeight);
         };
 
-        this.example = new Example9(this.app);
+        this.example = new Example8(this.app);
         window.requestAnimationFrame(_.bind(this.render, this));
     }
 

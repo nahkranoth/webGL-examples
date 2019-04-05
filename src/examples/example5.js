@@ -17,10 +17,7 @@ export default class Example5 {
 
         this.timer = this.app.createTimer();
 
-        var vsSource = vertShader;
-        var fsSource =  fragShader;
-
-        this.program = this.app.createProgram(vsSource, fsSource);
+        this.program = this.app.createProgram(vertShader, fragShader);
 
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]});
         var positions = this.app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);

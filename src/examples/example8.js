@@ -6,6 +6,11 @@ import vsSourceUpdate from "../shaders/offsetFeedbackTransform.vert"
 import fsSourceUpdate from "../shaders/offsetFeedbackTransform.frag"
 import {mat4, vec3} from "gl-matrix";
 
+
+/*TODO: Even in the direct copy of picogl feedback code I get screen flicker - curious how it runs on Windows.
+* TODO: Note that the shaders for this example are incorrect at the moment.
+* */
+
 export default class Example8{
     constructor(app){
         this.app = app;
@@ -115,7 +120,7 @@ export default class Example8{
         this.app.rasterize().clear();
 
         // TRANSFORM FEEDBACK
-        this.app.noRasterize();
+        this.app.noRasterize(); //note turning rasterization off for feedback
         this.updateDrawCall.draw();
 
         // DRAW

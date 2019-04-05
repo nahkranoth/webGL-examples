@@ -1,18 +1,25 @@
 #version 300 es
 
-layout(location=0) in vec3 position;
-layout(location=1) in vec3 color;
-layout(location=2) in vec3 offsets;
+        #define OFFSET_LOCATION 0
+        #define ROTATION_LOCATION 1
+        #define POSITION_LOCATION 2
+        #define COLOR_LOCATION 3
 
-uniform SceneUniforms {
-    mat4 viewProj;
-    vec4 eyePosition;
-};
+        layout(location=0) in vec2 aPosition;
+        layout(location=1) in vec3 aColor;
+        layout(location=2) in vec2 aOffset;
+        layout(location=3) in float aRotation;
 
-out vec3 vColor;
+        flat out vec3 vColor;
 
-void main(){
-    vec4 worldPosition = vec4(position + offsets, 0.0) * viewProj;
-    vColor = color;
-    gl_Position = worldPosition;
-}
+        void main() {
+            vColor = aColor;
+
+            float cosR = cos(aRotation);
+            float sinR = sin(aRotation);
+            mat2 rot = mat2(
+                cosR, sinR,
+                -sinR, cosR
+            );
+            gl_Position = vec4(rot * aPosition + aOffset, 0.0, 1.0);
+        }

@@ -1,9 +1,9 @@
 import _ from "underscore"
 import * as PicoGL from "picogl";
-import vertShader from "../shaders/offsetInitTransform.vert"
-import fragShader from "../shaders/offsetInitTransform.frag"
-import vsSourceUpdate from "../shaders/offsetFeedbackTransform.vert"
-import fsSourceUpdate from "../shaders/offsetFeedbackTransform.frag"
+import example8UpdateVert from "../shaders/example8Update.vert"
+import example8UpdateFrag from "../shaders/example8Update.frag"
+import example8DrawVert from "../shaders/example8Draw.vert"
+import example8DrawFrag from "../shaders/example8Draw.frag"
 import {mat4, vec3} from "gl-matrix";
 
 
@@ -21,9 +21,9 @@ export default class Example8{
         utils.addTimerElement();
         this.timer = this.app.createTimer();
 
-        var initProgram = this.app.createProgram(vertShader, fragShader);
+        var initProgram = this.app.createProgram(example8UpdateVert, example8UpdateFrag);
 
-        var updateProgram = this.app.createProgram(vsSourceUpdate, fsSourceUpdate, ["vPosition"]);
+        var updateProgram = this.app.createProgram(example8DrawVert, example8DrawFrag, ["vPosition"]);
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);

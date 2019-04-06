@@ -1,9 +1,9 @@
 import * as PicoGL from "picogl";
 import {mat4, vec3} from "gl-matrix";
-import vertShaderUpdate from "../shaders/offsetFeedbackTransform.vert"
-import fragShaderUpdate from "../shaders/offsetFeedbackTransform.frag"
-import vertShaderInit from "../shaders/offsetInitTransform.vert"
-import fragShaderInit from "../shaders/offsetInitTransform.frag"
+import vertShaderDraw from "../shaders/offsetFeedbackTransformDraw.vert"
+import fragShaderDraw from "../shaders/offsetFeedbackTransformDraw.frag"
+import vertShaderUpdate from "../shaders/offsetFeedbackTransformUpdate.vert"
+import fragShaderUpdate from "../shaders/offsetFeedbackTransformUpdate.frag"
 
 export default class Example8{
     constructor(app){
@@ -22,11 +22,10 @@ export default class Example8{
         this.timer = this.app.createTimer();
 
         // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        var updateProgram = this.app.createProgram(vertShaderUpdate, fragShaderUpdate, ["vOffset", "vRotation"]);
+        var updateProgram = this.app.createProgram(vertShaderDraw, fragShaderDraw, ["vOffset", "vRotation"]);
 
         // DRAW PROGRAM
-
-        var drawProgram = this.app.createProgram(vertShaderInit, fragShaderInit);
+        var drawProgram = this.app.createProgram(vertShaderUpdate, fragShaderUpdate);
 
         // GEO DATA
         var NUM_INSTANCES = 50000;

@@ -4,7 +4,7 @@ import example8DrawVert from "../shaders/example8Draw.vert"
 import example8DrawFrag from "../shaders/example8Draw.frag"
 import example8UpdateVert from "../shaders/example8Update.vert"
 import example8UpdateFrag from "../shaders/example8Update.frag"
-import {mat4, vec3} from "gl-matrix";
+import {mat4, mat3, vec3} from "gl-matrix";
 
 
 /*TODO: Even in the direct copy of picogl feedback code I get screen flicker - curious how it runs on Windows.
@@ -29,7 +29,7 @@ export default class Example8{
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 300);
+        var eyePosition = vec3.fromValues(0, 0, 30);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0,0,0), vec3.fromValues(0, 0.1, 0));
 
         var viewProjMatrix = mat4.create();
@@ -58,16 +58,20 @@ export default class Example8{
             0, 0, 1
         ]));
 
-        var INSTANCE_AMOUNT = 1000;
+        var INSTANCE_AMOUNT = 30;
         var offsetData = new Float32Array(INSTANCE_AMOUNT * 3);
+
+        var pos = vec3.create();
 
         for(var i=0;i<INSTANCE_AMOUNT;i++){
             var oi = i * 3;
-            //Make function that finds points along a sphere with a certain radius
-            //rotation matrix with a certain distance and a random xyz
-            offsetData[oi] = Math.random() * 2.0 - 1.0;
-            offsetData[oi+1] = Math.random() * 2.0 - 1.0;
-            offsetData[oi+2] = (i/3000)-0.04;
+
+            vec3.set(pos, 0, 0, 0);
+            vec3.transformMat4(pos, pos, this.getPositionOnSphereSurface());
+
+            offsetData[oi] = pos[0];
+            offsetData[oi+1] = pos[1];
+            offsetData[oi+2] = pos[2];
         }
 
         var offsetsInput = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData);
@@ -136,7 +140,15 @@ export default class Example8{
     }
 
     getPositionOnSphereSurface(){
-        var viewProjMatrix = mat4.create();
-        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        var destMatrix = mat4.create();
+        console.log(destMatrix);
+
+        //ORDER IS Scaling Rotation Translation
+        mat4.rotateZ(destMatrix, destMatrix, Math.random() * Math.PI * 2);
+        //mat4.rotateY(destMatrix, destMatrix, Math.random() * Math.PI * 2);
+
+        mat4.translate(destMatrix, destMatrix, [0.4, 0, 0]);
+
+        return destMatrix;
     }
 }

@@ -24,7 +24,7 @@ export class Main{
             this.app.resize(window.innerWidth, window.innerHeight);
         };
 
-        this.example = new Example9(this.app);
+        this.example = new Example8(this.app);
         window.requestAnimationFrame(_.bind(this.render, this));
     }
 

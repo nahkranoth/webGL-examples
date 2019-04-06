@@ -1,7 +1,9 @@
 import _ from "underscore"
 import * as PicoGL from "picogl";
-import example8FeedbackVert from "../shaders/example8Feedback.vert"
-import example8FeedbackFrag from "../shaders/example8Feedback.frag"
+import example8DrawVert from "../shaders/example8Draw.vert"
+import example8DrawFrag from "../shaders/example8Draw.frag"
+import example8UpdateVert from "../shaders/example8Update.vert"
+import example8UpdateFrag from "../shaders/example8Update.frag"
 import {mat4, vec3} from "gl-matrix";
 
 
@@ -19,15 +21,15 @@ export default class Example8{
         utils.addTimerElement();
         this.timer = this.app.createTimer();
 
-        var initProgram = this.app.createProgram(example8FeedbackVert, example8FeedbackFrag);
+        var drawProgram = this.app.createProgram(example8DrawVert, example8DrawFrag);
 
-        var updateProgram = this.app.createProgram(example8DrawVert, example8DrawFrag, ["vPosition"]);
+        var updateProgram = this.app.createProgram(example8UpdateVert, example8UpdateFrag, ["vPosition"]);
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, this.app.width / this.app.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 30);
+        var eyePosition = vec3.fromValues(0, 0, 300);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0,0,0), vec3.fromValues(0, 0.1, 0));
 
         var viewProjMatrix = mat4.create();
@@ -56,11 +58,13 @@ export default class Example8{
             0, 0, 1
         ]));
 
-        var INSTANCE_AMOUNT = 3000;
+        var INSTANCE_AMOUNT = 1000;
         var offsetData = new Float32Array(INSTANCE_AMOUNT * 3);
 
         for(var i=0;i<INSTANCE_AMOUNT;i++){
             var oi = i * 3;
+            //Make function that finds points along a sphere with a certain radius
+            //rotation matrix with a certain distance and a random xyz
             offsetData[oi] = Math.random() * 2.0 - 1.0;
             offsetData[oi+1] = Math.random() * 2.0 - 1.0;
             offsetData[oi+2] = (i/3000)-0.04;
@@ -99,8 +103,8 @@ export default class Example8{
 
         //DrawCalls
 
-        this.drawCallA = this.app.createDrawCall(initProgram, triangleArrayA).uniformBlock("SceneUniforms", sceneUniformBuffer);
-        this.drawCallB = this.app.createDrawCall(initProgram, triangleArrayB).uniformBlock("SceneUniforms", sceneUniformBuffer);
+        this.drawCallA = this.app.createDrawCall(drawProgram, triangleArrayA).uniformBlock("SceneUniforms", sceneUniformBuffer);
+        this.drawCallB = this.app.createDrawCall(drawProgram, triangleArrayB).uniformBlock("SceneUniforms", sceneUniformBuffer);
 
         this.updateDrawCallA = this.app.createDrawCall(updateProgram, updateArrayA).transformFeedback(transformFeedbackB);
         this.updateDrawCallB = this.app.createDrawCall(updateProgram, updateArrayB).transformFeedback(transformFeedbackA);
@@ -129,5 +133,10 @@ export default class Example8{
         this.mainDrawCall = this.mainDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
 
         this.timer.end();
+    }
+
+    getPositionOnSphereSurface(){
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
     }
 }

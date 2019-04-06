@@ -1,9 +1,7 @@
 import _ from "underscore"
 import * as PicoGL from "picogl";
-import example8UpdateVert from "../shaders/example8Update.vert"
-import example8UpdateFrag from "../shaders/example8Update.frag"
-import example8DrawVert from "../shaders/example8Draw.vert"
-import example8DrawFrag from "../shaders/example8Draw.frag"
+import example8FeedbackVert from "../shaders/example8Feedback.vert"
+import example8FeedbackFrag from "../shaders/example8Feedback.frag"
 import {mat4, vec3} from "gl-matrix";
 
 
@@ -21,7 +19,7 @@ export default class Example8{
         utils.addTimerElement();
         this.timer = this.app.createTimer();
 
-        var initProgram = this.app.createProgram(example8UpdateVert, example8UpdateFrag);
+        var initProgram = this.app.createProgram(example8FeedbackVert, example8FeedbackFrag);
 
         var updateProgram = this.app.createProgram(example8DrawVert, example8DrawFrag, ["vPosition"]);
 

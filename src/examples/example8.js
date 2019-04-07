@@ -58,7 +58,7 @@ export default class Example8{
             0, 0, 1
         ]));
 
-        var INSTANCE_AMOUNT = 30;
+        var INSTANCE_AMOUNT = 300000;
         var offsetData = new Float32Array(INSTANCE_AMOUNT * 3);
 
         var pos = vec3.create();
@@ -71,7 +71,7 @@ export default class Example8{
 
             offsetData[oi] = pos[0];
             offsetData[oi+1] = pos[1];
-            offsetData[oi+2] = pos[2];
+            offsetData[oi+2] = i/10000;
         }
 
         var offsetsInput = this.app.createVertexBuffer(PicoGL.FLOAT, 3, offsetData);
@@ -147,7 +147,7 @@ export default class Example8{
         mat4.rotateZ(destMatrix, destMatrix, Math.random() * Math.PI * 2);
         //mat4.rotateY(destMatrix, destMatrix, Math.random() * Math.PI * 2);
 
-        mat4.translate(destMatrix, destMatrix, [0.4, 0, 0]);
+        mat4.translate(destMatrix, destMatrix, [0.6, 0, 0]);
 
         return destMatrix;
     }

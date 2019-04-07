@@ -28,7 +28,7 @@ export default class Example8{
         var drawProgram = this.app.createProgram(vertShaderUpdate, fragShaderUpdate);
 
         // GEO DATA
-        var NUM_INSTANCES = 50000;
+        var NUM_INSTANCES = 1000000;
 
         var offsetData = new Float32Array(NUM_INSTANCES * 2);
         var rotationData = new Float32Array(NUM_INSTANCES);
